@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web-app.name" . }}-backend
+  labels:
+    {{ include "web-app.labels" . }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.backend.image }}
+        ports:
+        - containerPort: {{ .Values.backend.port }}
+        env:
+        - name: DB_HOST
+          value: "{{ .Values.backend.env.DB_HOST }}"
+        - name: DB_NAME
+          value: "{{ .Values.backend.env.DB_NAME }}"
+        - name: DB_USER
+          value: "{{ .Values.backend.env.DB_USER }}"
+        - name: DB_PASS
+          value: "{{ .Values.backend.env.DB_PASS }}"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - backend
+            topologyKey: "kubernetes.io/hostname"

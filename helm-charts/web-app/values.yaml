@@ -1,0 +1,36 @@
+frontend:
+  image: your-frontend-image
+  port: 9090
+  replicas: 2
+  ingress:
+    host: frontend.example.com
+    tlsSecret: frontend-tls
+  hpa:
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+backend:
+  image: your-backend-image
+  port: 8080
+  replicas: 3
+  env:
+    DB_HOST: database
+    DB_NAME: app_db
+    DB_USER: dbuser
+    DB_PASS: password
+
+database:
+  image: mysql:5.7
+  port: 3306
+  pvc:
+    size: 20Gi
+  credentials:
+    rootPassword: rootpassword
+    database: app_db
+    user: dbuser
+    password: password
+
+tlsIssuer:
+  enabled: true
+  name: selfsigned-issuer

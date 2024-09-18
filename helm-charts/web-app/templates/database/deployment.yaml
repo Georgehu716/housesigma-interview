@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web-app.name" . }}-database
+  labels:
+    {{ include "web-app.labels" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: {{ .Values.database.image }}
+        ports:
+        - containerPort: {{ .Values.database.port }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "{{ .Values.database.credentials.rootPassword }}"
+        - name: MYSQL_DATABASE
+          value: "{{ .Values.database.credentials.database }}"
+        - name: MYSQL_USER
+          value: "{{ .Values.database.credentials.user }}"
+        - name: MYSQL_PASSWORD
+          value: "{{ .Values.database.credentials.password }}"
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
